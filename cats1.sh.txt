@@ -1,0 +1,8 @@
+wget -O b "http://api.icndb.com/jokes/random?firstName=Chuck&amp;lastName=Norris"
+wget -O c "https://api.thecatapi.com/v1/images/search?size=full"
+d=$(cat c | jq '.[].url')
+eval "wget -O a $d"
+clear && clear
+catimg a
+cat b | jq '.value.joke'
+printf "\n"

@@ -1,0 +1,17 @@
+lynx -dump $1  > a
+while true
+do
+  lynx -dump $1  > b
+  sleep $2
+  clear && clear
+  diff a b
+  diff a b >> diff.txt
+  cp b a
+
+  git init
+  git add diff.txt
+  git commit -m "update"
+  git push -u origin master 
+
+
+done

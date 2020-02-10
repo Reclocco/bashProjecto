@@ -1,0 +1,29 @@
+printf '%-25s %-10s %-10s %-20s %-7s\n' NAME ID PID STATE FD
+echo ----------------------------------------------------------------------
+
+for ids in $(ls /proc/ | grep [0-9])
+do
+  if [ -e /proc/$ids/status ]
+  then
+  fd=$(ls /proc/$ids/fd/ | wc -l)
+  data=$(cat  2>/dev/null /proc/$ids/status) 
+
+  name=${data##*Name:}
+  name=${name%%Umask:*}
+  name=${name// }
+
+  id=${data%%PPid:*}
+  id=${id##*Pid:}
+  id=${id// }
+  
+  pid=${data##*PPid:}
+  pid=${pid%%TracerPid:*}
+  pid=${pid// }
+
+  state=${data##*State:}
+  state=${state%%Tgid:*}
+  state=${state// }
+
+  printf '%-25s %-10s %-10s %-20s %-7s\n' $name $id $pid $state $fd
+  fi
+done

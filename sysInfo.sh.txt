@@ -1,0 +1,77 @@
+tput civis
+oldnetu=0
+oldtime=0
+
+netout () {
+  if [ $1 -gt 999999 ]
+  then
+  let x=$1/1000000
+  echo $x MB
+  elif [ $1 -gt 999 ]
+  then
+  let x=$1/1000
+  echo $x KB
+  else
+  echo $1 B
+  fi
+  return 0
+}
+
+while true
+do
+  #czas
+  a=$(cat /proc/uptime)
+  t=${a%%.*.*}
+  let s=t%60
+  let m=(t/60)%60
+  let h=(t/3600)%24
+  let d=t/86400
+  #bateria
+  battery=$(cat /sys/class/power_supply/BAT1/uevent)
+  battery=${battery%POWER_SUPPLY_CAPACITY_*}
+  battery=${battery#*CAPACITY=}
+  #net
+  net=$(cat /proc/net/dev)
+  time=$(cat /proc/uptime)
+  time=${time%% *}
+  time=${time//.}
+  let delta=time-oldtime
+  oldtime=$time
+  netd=${net##*wlp2s0:}
+  netu=$(echo $netd | awk '{ print $9; }')
+  netd=$(echo $netd | awk '{ print $1; }')
+  let avgdownload=netd/t
+  let nowdownload=(netd-oldnetd)*100/delta
+  let avgupload=netu/t
+  let nowupload=(netu-oldnetu)*100/delta
+  oldnetd=$netd
+  oldnetu=$netu
+  #spanko
+  sleep 1
+  clear && clear
+  #wypisywanie
+  tput cup 1 1
+  echo $d days $h:$m:$s
+  tput cup 1 126
+  echo $battery % of battery
+  tput cup 3 1
+  echo DOWNLOAD
+  tput cup 5 1
+  echo avg:
+  tput cup 5 6
+  netout $avgdownload
+  tput cup 6 1
+  echo now:
+  tput cup 6 6
+  netout $nowdownload
+  tput cup 8 1
+  echo UPLOAD
+  tput cup 10 1
+  echo avg:
+  tput cup 10 6
+  netout $avgupload
+  tput cup 11 1
+  echo now:
+  tput cup 11 6
+  netout $nowupload
+done
